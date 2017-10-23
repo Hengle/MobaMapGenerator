@@ -1,0 +1,6 @@
+.vs
+/client/Library
+/client/Temp
+*.csproj
+*.sln
+.DS_Store
