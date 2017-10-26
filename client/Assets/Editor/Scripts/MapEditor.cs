@@ -19,38 +19,86 @@ public class MapEditor : Editor {
 	{
 
 	}
+		
+	private bool _lockSelect = true;
+	private MapBrush _mapBrush = new MapBrush();
+	private MapGenerator _mapGenerator;
 
 	void OnSceneGUI() 
 	{
-
+		_mapGenerator = target as MapGenerator;
 		Handles.BeginGUI();
-
 		//the rect to draw ui
 		GUILayout.BeginArea(new Rect(20, 20, 150, 800));
 
 		GUILayout.BeginHorizontal();
 		if(GUILayout.Button("Ground"))
-			Debug.Log("test");
+		{
+			_mapBrush.SetBrushType(BrushType.Ground);
+		}
 		if(GUILayout.Button("Tree"))
-			Debug.Log("test");
+		{
+			_mapBrush.SetBrushType(BrushType.Tree);
+		}
 		GUILayout.EndHorizontal();
 
 		GUILayout.BeginHorizontal();
 		if(GUILayout.Button("Wall"))
-			Debug.Log("test");
+		{
+			_mapBrush.SetBrushType(BrushType.Wall);
+		}
 		GUILayout.EndHorizontal();
 
 		GUILayout.BeginHorizontal();
 		if(GUILayout.Button("Config"))
-			Debug.Log("test");
+		{
+			_mapBrush.ClearBrush();
+		}
 		GUILayout.EndHorizontal();
 
 		GUILayout.BeginHorizontal();
 		if(GUILayout.Button("Save"))
-			Debug.Log("test");
+		{
+			_mapBrush.ClearBrush();
+		}
 		GUILayout.EndHorizontal();
 
 		GUILayout.EndArea();
 		Handles.EndGUI();
+
+		LockSelectionInSceneView();
+		BeginBrushMap();
 	}
+
+	void LockSelectionInSceneView()
+	{
+		Event e = Event.current;
+
+		int controlID = GUIUtility.GetControlID( FocusType.Passive);
+
+		if(_lockSelect && e.type == EventType.Layout)
+		{
+			HandleUtility.AddDefaultControl(controlID);
+		}
+	}
+
+	void BeginBrushMap()
+	{
+		if(_mapBrush.curBrushType != BrushType.None)
+		{
+			if (Event.current.type == EventType.MouseDown   
+				&& Event.current.button == 0)  
+			{  
+				RaycastHit hit;  
+				Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);  
+				if (Physics.Raycast(ray, out hit))  
+				{  
+					GameObject cell = hit.transform.gameObject;
+					MapCell mapCell = cell.GetComponent<MapCell>();
+					_mapGenerator.DrawMapWithBrush(_mapBrush,mapCell.coordinate);
+				}  
+			}  
+		}
+	}
+
 }
